@@ -1,0 +1,21 @@
+{
+  "name": "Sinners Anonymous",
+  "short_name": "Sinners Anonymous",
+  "description": "Digital sanctuary for your darkest confessions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
