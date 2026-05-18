@@ -600,7 +600,7 @@ export default function HomePage() {
                       letterSpacing: '0.05em',
                       opacity: 0.8
                     }}>
-                      Pay what your peace is worth
+                     
                     </p>
 
                   </motion.div>
