@@ -2,7 +2,6 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
-import { Flame } from 'lucide-react'
 import SinChamber from './components/chambers/SinChamber'
 
 type ChamberType = 'sin' | null
@@ -18,56 +17,51 @@ export default function HomePage() {
     const introTimer = setTimeout(() => {
       setShowIntro(false)
       setShowDoor(true)
-    }, 3500)
-
+    }, 4000)
     return () => clearTimeout(introTimer)
   }, [])
 
-  // MASSIVE flame particle system for immersive experience
-  const flameParticles = useMemo(() => {
+  // Candlelight particles — warm amber + deep red
+  const candleParticles = useMemo(() => {
     if (!isClient) return []
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-    const particleCount = isMobile ? 60 : 100 // INCREASED from 30!
-    
-    return Array.from({ length: particleCount }, (_, i) => ({
+    const count = isMobile ? 40 : 70
+    return Array.from({ length: count }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      duration: 3 + Math.random() * 4,
-      delay: Math.random() * 5,
-      size: 3 + Math.random() * 6,
-      intensity: Math.random()
+      duration: 4 + Math.random() * 4,
+      delay: Math.random() * 6,
+      size: 2 + Math.random() * 5,
+      isGold: i % 3 === 0
     }))
   }, [isClient])
 
-  // NEW: Floating embers for atmosphere
-  const floatingEmbers = useMemo(() => {
+  // Floating smoke wisps
+  const smokeWisps = useMemo(() => {
     if (!isClient) return []
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-    const emberCount = isMobile ? 30 : 50
-    
-    return Array.from({ length: emberCount }, (_, i) => ({
+    const count = isMobile ? 15 : 25
+    return Array.from({ length: count }, (_, i) => ({
       id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: 8 + Math.random() * 6,
-      delay: Math.random() * 8,
-      size: 2 + Math.random() * 4
+      left: 20 + Math.random() * 60,
+      duration: 10 + Math.random() * 8,
+      delay: Math.random() * 10,
+      size: 4 + Math.random() * 6
     }))
   }, [isClient])
 
-  // NEW: Background sparks
-  const backgroundSparks = useMemo(() => {
+  // Background sparks
+  const sparks = useMemo(() => {
     if (!isClient) return []
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-    const sparkCount = isMobile ? 20 : 35
-    
-    return Array.from({ length: sparkCount }, (_, i) => ({
+    const count = isMobile ? 15 : 30
+    return Array.from({ length: count }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      duration: 6 + Math.random() * 4,
-      delay: Math.random() * 10
+      duration: 5 + Math.random() * 5,
+      delay: Math.random() * 8
     }))
   }, [isClient])
 
@@ -78,110 +72,119 @@ export default function HomePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f0f0f 0%, #1a0000 25%, #4a0000 50%, #1a0000 75%, #0f0f0f 100%)',
+      // Dark wood + candlelight — confession booth
+      background: 'linear-gradient(160deg, #0a0a0a 0%, #1a0a00 25%, #2d1200 55%, #1a0a00 80%, #0a0a0a 100%)',
       position: 'relative',
       overflow: 'hidden'
     }}>
-      
-      {/* MASSIVE Flame Particle System */}
+
+      {/* ── PARTICLE SYSTEM ── */}
       {isClient && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-          {/* Main flame particles */}
-          {flameParticles.map((particle) => (
+
+          {/* Candlelight particles */}
+          {candleParticles.map((p) => (
             <motion.div
-              key={particle.id}
+              key={p.id}
               style={{
                 position: 'absolute',
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
-                backgroundColor: particle.intensity > 0.7 ? '#ef4444' : '#dc2626',
+                width: `${p.size}px`,
+                height: `${p.size}px`,
+                backgroundColor: p.isGold ? '#c9a96e' : '#dc2626',
                 borderRadius: '50%',
-                opacity: 0.5 + particle.intensity * 0.3,
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-                boxShadow: `0 0 ${8 + particle.size}px #dc2626`,
+                left: `${p.left}%`,
+                top: `${p.top}%`,
+                boxShadow: p.isGold
+                  ? `0 0 ${p.size * 2}px #c9a96e`
+                  : `0 0 ${p.size * 2}px #dc2626`,
               }}
               animate={{
                 y: [0, -50, 0],
-                opacity: [0.3, 0.8, 0.3],
-                scale: [1, 2, 1],
-                backgroundColor: ['#dc2626', '#ef4444', '#f87171', '#dc2626'],
+                opacity: [0.2, 0.7, 0.2],
+                scale: [1, 1.8, 1],
               }}
               transition={{
-                duration: particle.duration,
+                duration: p.duration,
                 repeat: Infinity,
-                delay: particle.delay,
-                ease: "easeInOut"
+                delay: p.delay,
+                ease: 'easeInOut'
               }}
             />
           ))}
 
-          {/* Floating embers */}
-          {floatingEmbers.map((ember) => (
+          {/* Smoke wisps rising from bottom */}
+          {smokeWisps.map((w) => (
             <motion.div
-              key={`ember-${ember.id}`}
+              key={`smoke-${w.id}`}
               style={{
                 position: 'absolute',
-                width: `${ember.size}px`,
-                height: `${ember.size}px`,
-                backgroundColor: '#fca5a5',
+                width: `${w.size}px`,
+                height: `${w.size}px`,
+                backgroundColor: 'rgba(201, 169, 110, 0.15)',
                 borderRadius: '50%',
-                opacity: 0.4,
-                left: `${ember.left}%`,
-                top: `${ember.top}%`,
-                boxShadow: '0 0 6px #fca5a5',
+                left: `${w.left}%`,
+                bottom: 0,
+                filter: 'blur(4px)'
               }}
               animate={{
-                y: [0, -120, 0],
-                x: [0, Math.sin(ember.id) * 25, 0],
-                opacity: [0.2, 0.6, 0.2],
-                scale: [1, 1.5, 1],
+                y: [0, -300],
+                x: [0, Math.sin(w.id) * 40, 0],
+                opacity: [0, 0.3, 0],
+                scale: [1, 4, 6],
               }}
               transition={{
-                duration: ember.duration,
+                duration: w.duration,
                 repeat: Infinity,
-                delay: ember.delay,
-                ease: "easeInOut"
+                delay: w.delay,
+                ease: 'easeOut'
               }}
             />
           ))}
 
-          {/* Background sparks */}
-          {backgroundSparks.map((spark) => (
+          {/* Gold sparks */}
+          {sparks.map((s) => (
             <motion.div
-              key={`spark-${spark.id}`}
+              key={`spark-${s.id}`}
               style={{
                 position: 'absolute',
                 width: '2px',
                 height: '2px',
-                backgroundColor: '#fbbf24',
+                backgroundColor: '#c9a96e',
                 borderRadius: '50%',
-                opacity: 0.6,
-                left: `${spark.left}%`,
-                top: `${spark.top}%`,
-                boxShadow: '0 0 4px #fbbf24',
+                left: `${s.left}%`,
+                top: `${s.top}%`,
+                boxShadow: '0 0 4px #c9a96e',
               }}
               animate={{
-                opacity: [0.2, 0.8, 0.2],
-                scale: [1, 2, 1],
+                opacity: [0, 0.8, 0],
+                scale: [0, 2, 0],
               }}
               transition={{
-                duration: spark.duration,
+                duration: s.duration,
                 repeat: Infinity,
-                delay: spark.delay,
+                delay: s.delay,
               }}
             />
           ))}
         </div>
       )}
 
-      {/* Intro Animation - Mobile Optimized */}
+      {/* Vignette */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.75) 100%)',
+        pointerEvents: 'none',
+        zIndex: 2
+      }} />
+
+      {/* ── INTRO SCREEN ── */}
       <AnimatePresence>
         {showIntro && (
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 2 }}
             style={{
               position: 'absolute',
               inset: 0,
@@ -190,79 +193,119 @@ export default function HomePage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: 'clamp(1rem, 4vw, 2rem)' // Better mobile padding
+              padding: 'clamp(1rem, 4vw, 2rem)'
             }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ duration: 2.5, ease: "easeOut" }}
-              style={{ 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5 }}
+              style={{
                 textAlign: 'center',
-                maxWidth: '90vw' // Prevent overflow on mobile
+                maxWidth: '90vw'
               }}
             >
-              <motion.h1
-                initial={{ letterSpacing: '0.3em' }}
-                animate={{ letterSpacing: '0.1em' }}
-                transition={{ duration: 2.5 }}
+              {/* Candle flicker on intro */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.5 }}
                 style={{
-                  fontSize: 'clamp(2rem, 8vw, 6rem)', // Better mobile scaling
-                  fontFamily: 'serif',
-                  color: '#fef3c7',
-                  marginBottom: '0.5rem',
-                  fontWeight: 400,
-                  lineHeight: 1.1 // Tighter mobile line height
+                  fontSize: 'clamp(3rem, 10vw, 5rem)',
+                  marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
+                  filter: 'drop-shadow(0 0 30px #c9a96e)'
                 }}
               >
-                SINNERS
+                <motion.span
+                  animate={{
+                    filter: [
+                      'drop-shadow(0 0 20px #c9a96e)',
+                      'drop-shadow(0 0 40px #c9a96e)',
+                      'drop-shadow(0 0 15px #c9a96e)',
+                      'drop-shadow(0 0 35px #c9a96e)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  🕯️
+                </motion.span>
+              </motion.div>
+
+              {/* Bless me Father */}
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 1.5 }}
+                style={{
+                  fontSize: 'clamp(1.8rem, 7vw, 5rem)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#fef3c7',
+                  marginBottom: 'clamp(0.3rem, 1vw, 0.5rem)',
+                  fontWeight: 300,
+                  lineHeight: 1.2,
+                  textShadow: '0 0 40px #c9a96e20'
+                }}
+              >
+                Bless me, Father.
               </motion.h1>
-              
+
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2, duration: 1.2 }}
+                transition={{ delay: 1.2, duration: 1.5 }}
                 style={{
-                  fontSize: 'clamp(1.2rem, 5vw, 3rem)', // Better mobile scaling
-                  fontFamily: 'serif',
+                  fontSize: 'clamp(1.2rem, 5vw, 3.2rem)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
                   color: '#dc2626',
-                  marginBottom: 'clamp(1rem, 4vw, 1.5rem)',
-                  fontWeight: 300,
-                  fontStyle: 'italic'
-                }}
-              >
-                Anonymous
-              </motion.h2>
-              
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2, duration: 1 }}
-                style={{
-                  fontSize: 'clamp(0.9rem, 2.8vw, 1.2rem)', // Better mobile scaling
-                  color: '#cbd5e1',
+                  marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
                   fontWeight: 300,
                   fontStyle: 'italic',
-                  lineHeight: 1.4,
-                  maxWidth: '32rem',
-                  margin: '0 auto'
+                  textShadow: '0 0 30px #dc262640'
                 }}
               >
-                I collect the secrets others cannot bear...
+                For I have sinned.
+              </motion.h2>
+
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 2, duration: 0.8 }}
+                style={{
+                  width: '60px',
+                  height: '1px',
+                  background: 'linear-gradient(90deg, transparent, #c9a96e60, transparent)',
+                  margin: '0 auto clamp(1rem, 3vw, 1.5rem)'
+                }}
+              />
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.3, duration: 1 }}
+                style={{
+                  fontSize: 'clamp(0.85rem, 2.5vw, 1.1rem)',
+                  color: '#94a3b8',
+                  fontWeight: 300,
+                  fontStyle: 'italic',
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1.6
+                }}
+              >
+                The booth is open.
               </motion.p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content - Mobile Optimized */}
+      {/* ── MAIN CONTENT ── */}
       <AnimatePresence>
         {showDoor && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 2 }}
             style={{
               position: 'relative',
               zIndex: 10,
@@ -271,263 +314,378 @@ export default function HomePage() {
               alignItems: 'center',
               justifyContent: 'center',
               minHeight: '100vh',
-              padding: 'clamp(1rem, 3vw, 2rem)' // Better mobile padding
+              padding: 'clamp(1rem, 3vw, 2rem)'
             }}
           >
-            
-            {/* Header - Mobile Optimized */}
+
+            {/* ── HEADER ── */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, delay: 0.3 }}
-              style={{ 
-                textAlign: 'center', 
-                marginBottom: 'clamp(2rem, 5vw, 4rem)',
-                padding: '0 clamp(0.5rem, 2vw, 1rem)' // Mobile padding
+              style={{
+                textAlign: 'center',
+                marginBottom: 'clamp(2.5rem, 6vw, 5rem)',
+                padding: '0 clamp(0.5rem, 2vw, 1rem)'
               }}
             >
-              <h2 style={{
-                fontSize: 'clamp(1.8rem, 6vw, 4rem)', // Better mobile scaling
-                fontFamily: 'serif',
+              {/* Eyebrow */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                style={{
+                  color: '#c9a96e',
+                  fontSize: 'clamp(0.7rem, 1.8vw, 0.85rem)',
+                  letterSpacing: '0.35em',
+                  textTransform: 'uppercase',
+                  marginBottom: 'clamp(1rem, 3vw, 1.5rem)',
+                  fontWeight: 300
+                }}
+              >
+                The Confession Booth
+              </motion.p>
+
+              <h1 style={{
+                fontSize: 'clamp(2rem, 7vw, 4.5rem)',
+                fontFamily: 'Georgia, "Times New Roman", serif',
                 color: '#fef3c7',
-                marginBottom: 'clamp(0.8rem, 2.5vw, 1rem)',
+                marginBottom: 'clamp(0.3rem, 1vw, 0.5rem)',
                 fontWeight: 300,
-                textShadow: '0 0 20px #dc262650',
-                lineHeight: 1.2 // Better mobile line height
+                lineHeight: 1.2,
+                textShadow: '0 0 60px #c9a96e15'
               }}>
-                Come to Me, Sinners
+                Bless me, Father.
+              </h1>
+
+              <h2 style={{
+                fontSize: 'clamp(1.3rem, 4.5vw, 2.8rem)',
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                color: '#dc2626',
+                marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
+                fontWeight: 300,
+                fontStyle: 'italic',
+                textShadow: '0 0 30px #dc262630'
+              }}>
+                For I have sinned.
               </h2>
-              
+
+              {/* Divider */}
+              <div style={{
+                width: '60px',
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, #c9a96e50, transparent)',
+                margin: '0 auto clamp(1.2rem, 3vw, 2rem)'
+              }} />
+
               <p style={{
-                fontSize: 'clamp(0.9rem, 3vw, 1.3rem)', // Better mobile scaling
-                color: '#cbd5e1',
-                maxWidth: '40rem',
+                fontSize: 'clamp(0.95rem, 2.8vw, 1.2rem)',
+                color: '#94a3b8',
+                maxWidth: '36rem',
                 margin: '0 auto',
-                lineHeight: 1.4, // Better mobile readability
-                fontWeight: 300
+                lineHeight: 1.7,
+                fontWeight: 300,
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic'
               }}>
-                Your secrets are safe with me. Tell me what you&apos;ve done. I&apos;ve heard worse.
+                No priest. No judgment. No one who knows your name.
+                <br />
+                Just you, your truth, and the silence of the booth.
               </p>
             </motion.div>
 
-            {/* The Confessional Door - Mobile Optimized */}
+            {/* ── THE CONFESSION BOOTH DOOR ── */}
             <motion.div
               initial={{ opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 1.8, 
+              transition={{
+                duration: 1.8,
                 delay: 0.6,
-                type: "spring",
-                stiffness: 80
+                type: 'spring',
+                stiffness: 70
               }}
-              whileHover={{ 
-                scale: 1.03,
-                y: -10,
-                transition: { duration: 0.3 }
+              whileHover={{
+                scale: 1.02,
+                y: -8,
+                transition: { duration: 0.4 }
               }}
-              whileTap={{ scale: 0.98 }} // Mobile tap feedback
+              whileTap={{ scale: 0.98 }}
               style={{
                 position: 'relative',
                 cursor: 'pointer',
-                maxWidth: 'clamp(280px, 85vw, 380px)', // Better mobile width
+                maxWidth: 'clamp(260px, 80vw, 360px)',
                 width: '100%'
               }}
               onClick={() => setSelectedChamber('sin')}
             >
-              {/* Door Structure */}
+              {/* Ambient glow behind door */}
+              <motion.div
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute',
+                  inset: '-20px',
+                  background: 'radial-gradient(ellipse at center, rgba(201,169,110,0.08) 0%, transparent 70%)',
+                  borderRadius: '50%',
+                  pointerEvents: 'none'
+                }}
+              />
+
+              {/* Door structure */}
               <div style={{
                 position: 'relative',
                 width: '100%',
-                height: 'clamp(350px, 55vh, 480px)', // Better mobile height
+                height: 'clamp(380px, 58vh, 500px)',
               }}>
-                
-                {/* Door Frame */}
+
+                {/* Outer frame — dark wood */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(145deg, #1f1f1f, #0a0a0a)',
-                  borderRadius: 'clamp(0.8rem, 2.5vw, 1.2rem) clamp(0.8rem, 2.5vw, 1.2rem) 0.4rem 0.4rem',
-                  padding: 'clamp(8px, 2vw, 10px)',
-                  boxShadow: '0 25px 50px rgba(0, 0, 0, 0.8)'
+                  background: 'linear-gradient(145deg, #2a1a0a, #0f0800)',
+                  borderRadius: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.5rem) 0.3rem 0.3rem',
+                  padding: 'clamp(8px, 2vw, 12px)',
+                  boxShadow: '0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(201,169,110,0.1)'
                 }}>
-                  
-                  {/* Door Panel */}
+
+                  {/* Inner door panel */}
                   <motion.div
                     whileHover={{
-                      boxShadow: '0 0 30px #dc262660',
-                      borderColor: '#dc2626'
+                      boxShadow: '0 0 40px rgba(201,169,110,0.15), inset 0 0 30px rgba(201,169,110,0.03)',
+                      borderColor: 'rgba(201,169,110,0.4)'
                     }}
                     style={{
                       width: '100%',
                       height: '100%',
-                      background: 'linear-gradient(145deg, #2a0000, #1a0000)',
-                      borderRadius: 'clamp(0.6rem, 2vw, 1rem) clamp(0.6rem, 2vw, 1rem) 0.2rem 0.2rem',
-                      border: '2px solid #dc262640',
+                      background: 'linear-gradient(160deg, #1a0d00, #0f0800, #1a0d00)',
+                      borderRadius: 'clamp(0.7rem, 2vw, 1.2rem) clamp(0.7rem, 2vw, 1.2rem) 0.2rem 0.2rem',
+                      border: '1px solid rgba(201,169,110,0.15)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: 'clamp(1rem, 3vw, 2.5rem)',
-                      transition: 'all 0.4s ease',
-                      backdropFilter: 'blur(8px)',
-                      position: 'relative'
+                      padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+                      transition: 'all 0.5s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
                     }}
                   >
-                    
-                    {/* Door Handle */}
+                    {/* Wood grain texture overlay */}
                     <div style={{
                       position: 'absolute',
-                      right: 'clamp(12px, 3vw, 20px)',
+                      inset: 0,
+                      backgroundImage: `repeating-linear-gradient(
+                        90deg,
+                        transparent,
+                        transparent 2px,
+                        rgba(201,169,110,0.01) 2px,
+                        rgba(201,169,110,0.01) 4px
+                      )`,
+                      pointerEvents: 'none'
+                    }} />
+
+                    {/* Door handle */}
+                    <div style={{
+                      position: 'absolute',
+                      right: 'clamp(12px, 3vw, 18px)',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      width: 'clamp(10px, 2.5vw, 16px)',
-                      height: 'clamp(35px, 7vw, 55px)',
-                      background: 'linear-gradient(145deg, #8b0000, #4a0000)',
+                      width: 'clamp(8px, 2vw, 12px)',
+                      height: 'clamp(40px, 8vw, 60px)',
+                      background: 'linear-gradient(145deg, #c9a96e, #8a6a30)',
                       borderRadius: '6px',
-                      boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.5)'
+                      boxShadow: '0 0 10px rgba(201,169,110,0.3), inset 0 2px 4px rgba(0,0,0,0.5)'
                     }} />
-                    
-                    {/* Flame Icon */}
+
+                    {/* Cross above candle */}
+                    <div style={{
+                      position: 'relative',
+                      width: 'clamp(20px, 5vw, 28px)',
+                      height: 'clamp(28px, 7vw, 38px)',
+                      marginBottom: 'clamp(0.5rem, 2vw, 1rem)'
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: '50%',
+                        top: 0,
+                        transform: 'translateX(-50%)',
+                        width: '3px',
+                        height: '100%',
+                        background: 'linear-gradient(180deg, #c9a96e, #8a6a30)',
+                        borderRadius: '2px',
+                        boxShadow: '0 0 8px #c9a96e60'
+                      }} />
+                      <div style={{
+                        position: 'absolute',
+                        left: '15%',
+                        top: '28%',
+                        width: '70%',
+                        height: '3px',
+                        background: 'linear-gradient(90deg, #c9a96e, #8a6a30)',
+                        borderRadius: '2px',
+                        boxShadow: '0 0 8px #c9a96e60'
+                      }} />
+                    </div>
+
+                    {/* Candle */}
                     <motion.div
                       animate={{
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0]
+                        filter: [
+                          'drop-shadow(0 0 15px #c9a96e)',
+                          'drop-shadow(0 0 25px #c9a96e)',
+                          'drop-shadow(0 0 10px #c9a96e)',
+                          'drop-shadow(0 0 20px #c9a96e)',
+                        ]
                       }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                       style={{
-                        marginBottom: 'clamp(0.8rem, 3vw, 1.5rem)',
-                        padding: 'clamp(0.8rem, 2.5vw, 1.5rem)',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #dc262650, #ef444470)',
-                        border: '2px solid #dc2626',
-                        boxShadow: '0 0 25px #dc262640'
+                        fontSize: 'clamp(2rem, 6vw, 3rem)',
+                        marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
                       }}
                     >
-                      <Flame 
-                        size={typeof window !== 'undefined' && window.innerWidth < 768 ? 28 : 45} 
-                        color="#dc2626"
-                        strokeWidth={1.5}
-                      />
+                      🕯️
                     </motion.div>
-                    
-                    {/* Door Title */}
+
+                    {/* Door title */}
                     <h3 style={{
-                      fontSize: 'clamp(1.2rem, 4vw, 2rem)', // Better mobile scaling
-                      fontFamily: 'serif',
+                      fontSize: 'clamp(1.1rem, 3.5vw, 1.7rem)',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
                       color: '#fef3c7',
-                      marginBottom: 'clamp(0.4rem, 1.5vw, 0.8rem)',
+                      marginBottom: 'clamp(0.4rem, 1.5vw, 0.7rem)',
                       textAlign: 'center',
                       fontWeight: 400,
-                      textShadow: '0 0 15px #dc262650',
-                      lineHeight: 1.2
+                      lineHeight: 1.2,
+                      textShadow: '0 0 20px #c9a96e30'
                     }}>
-                      Tell Me Your Secrets
+                      Enter the Booth
                     </h3>
-                    
-                    {/* Door Subtitle */}
+
+                    {/* Subtitle */}
                     <p style={{
                       color: '#dc2626',
-                      fontSize: 'clamp(0.8rem, 2.5vw, 1.1rem)', // Better mobile scaling
+                      fontSize: 'clamp(0.8rem, 2.3vw, 1rem)',
                       textAlign: 'center',
-                      marginBottom: 'clamp(0.6rem, 2vw, 1.2rem)',
+                      marginBottom: 'clamp(0.8rem, 2.5vw, 1.2rem)',
                       fontStyle: 'italic',
-                      fontWeight: 500
+                      fontFamily: 'Georgia, serif'
                     }}>
-                      What have you done?
+                      It&apos;s been a while since your last confession.
                     </p>
-                    
+
                     {/* Description */}
                     <p style={{
-                      color: '#cbd5e1',
-                      fontSize: 'clamp(0.75rem, 2.2vw, 0.95rem)', // Better mobile scaling
+                      color: '#94a3b8',
+                      fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
                       textAlign: 'center',
-                      lineHeight: 1.3,
-                      marginBottom: 'clamp(0.6rem, 2vw, 1.2rem)'
+                      lineHeight: 1.6,
+                      marginBottom: 'clamp(0.8rem, 2.5vw, 1.2rem)',
+                      fontFamily: 'Georgia, serif',
+                      fontStyle: 'italic',
+                      fontWeight: 300
                     }}>
-                      I collect what others cannot bear. Tell me what haunts you.
+                      Say what you cannot say anywhere else.
+                      <br />
+                      Be heard. Be released.
                     </p>
-                    
-                    {/* Benefit */}
+
+                    {/* Price note */}
                     <p style={{
-                      color: '#dc2626',
-                      fontSize: 'clamp(0.7rem, 2vw, 0.9rem)', // Better mobile scaling
+                      color: '#c9a96e',
+                      fontSize: 'clamp(0.7rem, 1.8vw, 0.85rem)',
                       textAlign: 'center',
-                      fontWeight: '600',
-                      textShadow: '0 0 8px #dc262630'
+                      fontWeight: 400,
+                      letterSpacing: '0.05em',
+                      opacity: 0.8
                     }}>
-                      Every secret has a price
+                      Pay what your peace is worth
                     </p>
+
                   </motion.div>
                 </div>
               </div>
-              
-              {/* Name Plate - Mobile Optimized */}
+
+              {/* Name plate */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.5 }}
+                transition={{ delay: 1.8 }}
                 style={{
                   position: 'absolute',
-                  bottom: 'clamp(-50px, -10vw, -70px)',
+                  bottom: 'clamp(-45px, -9vw, -60px)',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  padding: 'clamp(0.4rem, 1.5vw, 0.7rem) clamp(1rem, 3vw, 2rem)',
-                  background: 'rgba(26, 0, 0, 0.95)',
-                  borderRadius: 'clamp(0.6rem, 2vw, 1rem)',
-                  border: '2px solid #dc2626',
+                  padding: 'clamp(0.4rem, 1.5vw, 0.6rem) clamp(1.2rem, 3vw, 2rem)',
+                  background: 'rgba(15, 8, 0, 0.95)',
+                  borderRadius: '0.4rem',
+                  border: '1px solid rgba(201,169,110,0.3)',
                   backdropFilter: 'blur(10px)',
-                  boxShadow: '0 0 20px #dc262640'
+                  boxShadow: '0 0 20px rgba(201,169,110,0.1)',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 <p style={{
-                  color: '#fef3c7',
-                  fontSize: 'clamp(0.75rem, 2.2vw, 1rem)', // Better mobile scaling
+                  color: '#c9a96e',
+                  fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
                   margin: 0,
-                  fontWeight: '600',
-                  textShadow: '0 0 10px #dc262650',
-                  fontStyle: 'italic'
+                  fontWeight: 400,
+                  fontStyle: 'italic',
+                  fontFamily: 'Georgia, serif',
+                  letterSpacing: '0.05em'
                 }}>
-                  Enter... I&apos;m Waiting
+                  The booth is open 🕯️
                 </p>
               </motion.div>
             </motion.div>
 
-            {/* Footer - Mobile Optimized */}
+            {/* ── FOOTER ── */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 1.2, delay: 1.8 }}
+              transition={{ duration: 1.5, delay: 2 }}
               style={{
-                marginTop: 'clamp(3rem, 8vw, 7rem)',
+                marginTop: 'clamp(4rem, 10vw, 8rem)',
                 textAlign: 'center',
-                color: '#94a3b8',
                 maxWidth: '32rem',
-                margin: 'clamp(3rem, 8vw, 7rem) auto 0',
-                padding: '0 clamp(0.5rem, 2vw, 1rem)' // Mobile padding
+                padding: '0 clamp(1rem, 3vw, 2rem)'
               }}
             >
-              <p style={{ 
-                fontSize: 'clamp(0.8rem, 2.3vw, 1rem)', // Better mobile scaling
+              {/* Divider */}
+              <div style={{
+                width: '40px',
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, #c9a96e30, transparent)',
+                margin: '0 auto clamp(1rem, 3vw, 1.5rem)'
+              }} />
+
+              <p style={{
+                fontSize: 'clamp(0.8rem, 2.2vw, 0.95rem)',
                 fontWeight: 300,
-                marginBottom: '0.5rem',
-                lineHeight: 1.4
+                color: '#475569',
+                marginBottom: '0.75rem',
+                lineHeight: 1.6
               }}>
-                Your secrets are safe with me. Anonymous. Eternal. Protected.
+                Anonymous. Encrypted. Gone forever.
               </p>
-              <p style={{ 
-                fontSize: 'clamp(0.75rem, 2vw, 0.95rem)', // Better mobile scaling
-                color: '#dc2626',
+
+              <p style={{
+                fontSize: 'clamp(0.8rem, 2.2vw, 0.95rem)',
+                color: '#c9a96e',
                 fontStyle: 'italic',
-                fontWeight: 400,
-                lineHeight: 1.3
+                fontFamily: 'Georgia, serif',
+                opacity: 0.6,
+                lineHeight: 1.7
               }}>
-                &quot;Come to me, all you who are heavy laden...&quot;
+                &quot;Come to me, all you who are weary and burdened,
+                <br />
+                and I will give you rest.&quot;
+                <br />
+                <span style={{ fontSize: '0.85em', opacity: 0.7 }}>— Matthew 11:28</span>
               </p>
             </motion.div>
+
           </motion.div>
         )}
       </AnimatePresence>
