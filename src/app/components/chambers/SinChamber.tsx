@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowLeft, Send, DollarSign } from 'lucide-react'
-import SinnersAnonymousBuyMeCoffeeButton from '../SinnersAnonymousBuyMeCoffeeButton'
+import SinnersAnonymousPaystackButton from '../SinnersAnonymousPaystackButton'
 import { trackConfessionalEntry, trackSinStart, trackAmountSelection, trackPaymentInitiated, trackSinCompleted } from '../../lib/analytics'
 
 interface SinChamberProps {
@@ -693,10 +693,11 @@ This booth holds no record. No one will know. Say it.`}
               animate={{ opacity: isValidAmount ? 1 : 0.4, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <SinnersAnonymousBuyMeCoffeeButton
-                amount={amount}
-                onPaymentSuccess={handlePaymentSuccess}
-              />
+              <SinnersAnonymousPaystackButton
+  amount={amount}
+  onPaymentSuccess={handlePaymentSuccess}
+/>
+
             </motion.div>
 
             {/* Skip/back options */}
