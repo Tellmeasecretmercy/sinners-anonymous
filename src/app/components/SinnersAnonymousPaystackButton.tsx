@@ -16,7 +16,7 @@ export default function SinnersAnonymousPaystackButton({
 
   const handleClick = () => {
     localStorage.setItem('lastSinAmount', amount)
-    window.open('https://paystack.shop/pay/sinners', '_blank')
+    window.open('https://paystack.shop/pay/rbbrpad1ix', '_blank')
 
     const handleFocus = () => {
       window.removeEventListener('focus', handleFocus)
